@@ -29,19 +29,26 @@ Test it with InMemory DB:
 Test it with local SQL Server:
 1. set appsettings.Development.json->UserInMemoryDB to false.
 2. set appsettings.Development.json->SqlServerConnection to your local SQL server connection string.
-3. run the service directly.
+3. run the service directly. with command: docker run -p 18080:8080 -d {user name}/weatherservice
 4. you will see the log "--> Using SqlServer Db", it means you are using SQL server.
 5. the first time start the service, it will migrate db automatically.
 6. you can test all the endpoints with database.
 7. Default seed three records in it.
+8. If first time run the service, need apply the migration: dotnet ef database update
 
 Release system by docker and K8S:
 
 Go to K8S project. user terminal to follow next steps.
 1. Deploy weatherservice to K8S.
+  a. build service image. docker build -t {user name}/weatherservice .
+  b. push image to docker hub. docker push {user name}/weatherservice
+  c. change K8S -> weather-depl.yaml -> spec -> template-> spec-> containers -> image value to {user name}/weatherservice:latest
+  d. run command: kubectl apply -f weather-depl.yaml
+  e. deploy port service: kubectl apply -f weather-np-srv.yaml
+  f. expose port number is 31333.
+  g. use http://localhost:31333 to test the service
 
-
-2. Deploy SQL Server to K8S.
+3. Deploy SQL Server to K8S.
   a. deploy local volume by command: kubectl apply - f local-pvc.yaml
   b. you will see message "persistentvolumeclaim/mssql-weather created" for your first time deploy.
   c. use command: "kubectl get pvc" to check the result.
@@ -58,5 +65,5 @@ Go to K8S project. user terminal to follow next steps.
   e. local sql string: Server=localhost,14330;Initial Catalog=Weather;User ID=sa;Password=Pa55w0rd!;TrustServerCertificate=True;
   f. production sql string: Server=mssql-cad-clusterip-srv,14331;Initial Catalog=Weather;User ID=sa;Password=Pa55w0rd!;TrustServerCertificate=True;
   
-4. Test the service locally.
-
+4. Test the service in K8S.
+http://localhost:31333/api/v1/weather/data
