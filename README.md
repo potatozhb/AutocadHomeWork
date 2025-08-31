@@ -9,6 +9,8 @@ Write Production ready code.
 Architecture:
 <img width="1554" height="811" alt="image" src="https://github.com/user-attachments/assets/d90702c6-6a76-4f34-bff7-6933b8bf5913" />
 
+
+
 Endpoints:
 1. Get all datas in the table. use it for interview, it will show all informations include key.
 GET /api/v1/Weather
@@ -19,12 +21,15 @@ GET /api/v1/Weather/data?start={int?}&end={int?}
 3. Post a record by user
 POST /api/v1/Weather/data
 
+
+
 Test it with InMemory DB:
 1. set appsettings.Development.json->UserInMemoryDB to true.
 2. run the service directly.
 3. you will see the log "--> Using InMem Db", it means you are using InMemory DB.
 4. you can test all the endpoints without any DB.
 5. Default seed three records in it.
+
 
 Test it with local SQL Server:
 1. set appsettings.Development.json->UserInMemoryDB to false.
@@ -36,34 +41,37 @@ Test it with local SQL Server:
 7. Default seed three records in it.
 8. If first time run the service, need apply the migration: dotnet ef database update
 
+
+
 Release system by docker and K8S:
 
 Go to K8S project. user terminal to follow next steps.
-1. Deploy weatherservice to K8S.
-  a. build service image. docker build -t {user name}/weatherservice .
-  b. push image to docker hub. docker push {user name}/weatherservice
-  c. change K8S -> weather-depl.yaml -> spec -> template-> spec-> containers -> image value to {user name}/weatherservice:latest
-  d. run command: kubectl apply -f weather-depl.yaml
-  e. deploy port service: kubectl apply -f weather-np-srv.yaml
-  f. expose port number is 31333.
-  g. use http://localhost:31333 to test the service
 
-3. Deploy SQL Server to K8S.
-  a. deploy local volume by command: kubectl apply - f local-pvc.yaml
-  b. you will see message "persistentvolumeclaim/mssql-weather created" for your first time deploy.
-  c. use command: "kubectl get pvc" to check the result.
+a. Deploy weatherservice to K8S.
+  1. build service image. docker build -t {user name}/weatherservice .
+  2. push image to docker hub. docker push {user name}/weatherservice
+  3. change K8S -> weather-depl.yaml -> spec -> template-> spec-> containers -> image value to {user name}/weatherservice:latest
+  4. run command: kubectl apply -f weather-depl.yaml
+  5. deploy port service: kubectl apply -f weather-np-srv.yaml
+  6. expose port number is 31333
+  7. use http://localhost:31333 to test the service
+
+b. Deploy SQL Server to K8S.
+  1. deploy local volume by command: kubectl apply - f local-pvc.yaml
+  2. you will see message "persistentvolumeclaim/mssql-weather created" for your first time deploy.
+  3. use command: "kubectl get pvc" to check the result.
 
    ---Create SQL server strong password
-  a. use command to create a name: mssqlcad, key:SA_PW secret.  kubectl create secret generic mssqlcad --from-literal=SA_PASSWORD="Pa55w0rd!"
-  b. you will see message "secret/mssqlcad created"
+  1. use command to create a name: mssqlcad, key:SA_PW secret.  kubectl create secret generic mssqlcad --from-literal=SA_PASSWORD="Pa55w0rd!"
+  2. you will see message "secret/mssqlcad created"
 
   --Create loadbalancer to enable local SQL Management visit K8S db, release sql
-  a. deploy three service to K8S.  kubectl apply -f mssql-depl.yaml
-  b. you will see three new service running by command: kubectl get svc
-  c. mssql-cad-depl, mssql-cad-clusterip-srv, mssql-cad-loadbalancer
-  d. you can use local SQL Management to login the DB. username: localhost,14331 , password: pa55w0rd!
-  e. local sql string: Server=localhost,14330;Initial Catalog=Weather;User ID=sa;Password=Pa55w0rd!;TrustServerCertificate=True;
-  f. production sql string: Server=mssql-cad-clusterip-srv,14331;Initial Catalog=Weather;User ID=sa;Password=Pa55w0rd!;TrustServerCertificate=True;
+  1. deploy three service to K8S.  kubectl apply -f mssql-depl.yaml
+  2. you will see three new service running by command: kubectl get svc
+  3. mssql-cad-depl, mssql-cad-clusterip-srv, mssql-cad-loadbalancer
+  4. you can use local SQL Management to login the DB. username: localhost,14331 , password: pa55w0rd!
+  5. local sql string: Server=localhost,14330;Initial Catalog=Weather;User ID=sa;Password=Pa55w0rd!;TrustServerCertificate=True;
+  6. production sql string: Server=mssql-cad-clusterip-srv,14331;Initial Catalog=Weather;User ID=sa;Password=Pa55w0rd!;TrustServerCertificate=True;
   
-4. Test the service in K8S.
+c. Test the service in K8S.
 http://localhost:31333/api/v1/weather/data
