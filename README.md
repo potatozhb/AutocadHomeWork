@@ -1,10 +1,16 @@
-Requirements
+Requirements 
 
-Use C# for the entire implementation.
-Use a relational database for the data layer.
-Include instructions on how to run and test your API in a README file.
-Provide generated API documentation using an OpenAPI spec, or similar.
-Write Production ready code.
+Use C# for the entire implementation. 
+
+Use a relational database for the data layer. 
+
+Include instructions on how to run and test your API in a README file. 
+
+Provide generated API documentation using an OpenAPI spec, or similar. 
+
+Write Production ready code. 
+
+--------------------------------------------------------------------------------
 
 Architecture:
 <img width="1252" height="759" alt="image" src="https://github.com/user-attachments/assets/fd5ec626-5e47-4287-994d-661679d5bf06" />
