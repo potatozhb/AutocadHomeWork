@@ -7,7 +7,8 @@ Provide generated API documentation using an OpenAPI spec, or similar.
 Write Production ready code.
 
 Architecture:
-<img width="1182" height="734" alt="image" src="https://github.com/user-attachments/assets/bbee6728-301f-4284-b07b-a6002a289905" />
+<img width="1264" height="808" alt="image" src="https://github.com/user-attachments/assets/ca678911-6b83-4aaf-b939-6342b5b17b26" />
+
 
 K8S:
 <img width="1230" height="718" alt="image" src="https://github.com/user-attachments/assets/f8f19bdc-dade-495d-81b8-ddd6aea192bd" />
