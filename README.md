@@ -14,21 +14,29 @@ K8S:
 
 
 Endpoints:
-1. Login , after login success, use raw bear token for endpoints 3 and 4.
+1. Login , after login success, use raw bear token for endpoints 3 and 4.  
 
-POST /api/v1/auth/login
-{
-  "username":"string",
-  "password":"admin "  //hardcode inside, have to be "admin", because no enrollment endpoint
-}
+POST /api/v1/auth/login 
+
+{ 
+
+  "username":"string", 
+  
+  "password":"admin "  //hardcode inside, have to be "admin", because no enrollment endpoint 
+
+} 
+
 
 2. Get all datas in the table. use it for interview, it will show all informations include key.
+
 GET /api/v1/Weather
 
 3.  Get all datas by user id.
+
 GET /api/v1/Weather/data?start={int?}&end={int?}
 
 4. Post a record by user
+
 POST /api/v1/Weather/data
 
 
@@ -57,7 +65,7 @@ Release system by docker and K8S:
 
 Go to K8S project. user terminal to follow next steps.
 
-a. Deploy weatherservice to K8S.
+a. Deploy weatherservice to K8S. 
   1. build service image. docker build -t {user name}/weatherservice .
   2. push image to docker hub. docker push {user name}/weatherservice
   3. change K8S -> weather-depl.yaml -> spec -> template-> spec-> containers -> image value to {user name}/weatherservice:latest
@@ -66,7 +74,7 @@ a. Deploy weatherservice to K8S.
   6. expose port number is 31333
   7. use http://localhost:31333 to test the service
 
-b. Deploy SQL Server to K8S.
+b. Deploy SQL Server to K8S. 
   1. deploy local volume by command: kubectl apply - f local-pvc.yaml
   2. you will see message "persistentvolumeclaim/mssql-weather created" for your first time deploy.
   3. use command: "kubectl get pvc" to check the result.
