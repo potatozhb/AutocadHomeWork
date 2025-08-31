@@ -9,6 +9,10 @@ Write Production ready code.
 Architecture:
 <img width="1182" height="734" alt="image" src="https://github.com/user-attachments/assets/bbee6728-301f-4284-b07b-a6002a289905" />
 
+K8S:
+<img width="1230" height="718" alt="image" src="https://github.com/user-attachments/assets/f8f19bdc-dade-495d-81b8-ddd6aea192bd" />
+
+
 Endpoints:
 1. Login , after login success, use raw bear token for endpoints 3 and 4.
 
