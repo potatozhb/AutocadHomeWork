@@ -32,6 +32,7 @@ namespace WeatherSrv.Controllers
         public async Task<ActionResult<IEnumerable<WeatherReadDto>>> GetWeathers()
         {
             _logger.LogInformation("--> Getting Weathers....");
+            Console.WriteLine("--> Getting Weathers....");
 
             var weathers = await this._weatherRepo.GetAllWeathersAsync();
 
@@ -49,6 +50,7 @@ namespace WeatherSrv.Controllers
             if (start.HasValue && end.HasValue)
             {
                 _logger.LogInformation($"--> Getting Weathers for user {userId} from index {start.Value} to {end.Value}....");
+                Console.WriteLine($"--> Getting Weathers for user {userId} from index {start.Value} to {end.Value}....");
                 if (start < 0 || end <= start)
                     return BadRequest("Invalid paging parameters");
 
@@ -57,6 +59,7 @@ namespace WeatherSrv.Controllers
             else
             {
                 _logger.LogInformation($"--> Getting Weathers for user {userId}....");
+                Console.WriteLine($"--> Getting Weathers for user {userId}....");
                 weathers = await this._weatherRepo.GetAllWeathersByUserAsync(userId);
             }
 
@@ -68,10 +71,11 @@ namespace WeatherSrv.Controllers
 
         [HttpPost("data")]
         public async Task<ActionResult<WeatherReadDto>> CreateWeatherForUser(
-                                [FromHeader(Name = "x-userId")] string userId, 
+                                [FromHeader(Name = "x-userId")] string userId,
                                 [FromBody] WeatherCreateDto weatherCreateDto)
         {
             _logger.LogInformation($"--> Creating Weathers for user {userId}....");
+            Console.WriteLine($"--> Creating Weathers for user {userId}....");
             /*
              * Suppose we just record one place weather.
              1. if different users create opposite data, how to handle?
@@ -86,7 +90,7 @@ namespace WeatherSrv.Controllers
 
             await this._weatherRepo.SaveChangesAsync();
 
-            return Created("",weathersReadDto);
+            return Created("", weathersReadDto);
         }
     }
 

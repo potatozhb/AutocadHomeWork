@@ -1,5 +1,5 @@
+using Microsoft.EntityFrameworkCore;
 using WeatherSrv.Models;
-using WeatherSrv.Repos;
 
 namespace WeatherSrv.Data
 {
@@ -20,7 +20,7 @@ namespace WeatherSrv.Data
                 Console.WriteLine("--> Attempting to apply migration...");
                 try
                 {
-                    //context.Database.Migrate();
+                    context.Database.Migrate();
                 }
                 catch (Exception ex)
                 {
@@ -33,7 +33,7 @@ namespace WeatherSrv.Data
                 Console.WriteLine("--> Seeding data...");
                 DateTime utc = DateTime.UtcNow.AddHours(-1);
                 context.Weathers.AddRange(
-                    new Weather { UserId = "Bob", Rain = false, CreateTime = utc, UpdateTime = utc},
+                    new Weather { UserId = "Bob", Rain = false, CreateTime = utc, UpdateTime = utc },
                     new Weather { UserId = "Bob", Rain = true },
                     new Weather { UserId = "Alice", Rain = true }
                 );

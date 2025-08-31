@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mssql-cad-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mssql-cad
+  template:
+    metadata:
+      labels:
+        app: mssql-cad
+    spec:
+      containers:
+        - name: mssql-cad
+          image: mcr.microsoft.com/mssql/server:2022-latest
+          ports:
+            - containerPort: 14331
+          env:
+            - name: MSSQL_PID
+              value: "Express"
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mssqlcad
+                  key: SA_PASSWORD
+            - name: MSSQL_TCP_PORT
+              value: "14331"
+          volumeMounts:
+            - mountPath: /var/opt/mssql/data
+              name: mssqldb
+      volumes:
+        - name: mssqldb
+          persistentVolumeClaim:
+            claimName: mssql-weather
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mssql-cad-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: mssql-cad
+  ports:
+    - name: mssql-cad
+      protocol: TCP
+      port: 14331
+      targetPort: 14331
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mssql-cad-loadbalancer
+spec:
+  type: LoadBalancer
+  selector:
+    app: mssql-cad
+  ports:
+    - protocol: TCP
+      port: 14331
+      targetPort: 14331
