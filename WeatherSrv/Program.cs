@@ -111,6 +111,10 @@ app.UseAuthorization();
 app.UseMiddleware<JsonFormatMiddleware>();
 
 app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
 
 app.UseAuthorization();
 

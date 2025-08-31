@@ -26,6 +26,12 @@ namespace WeatherSrv.Services
             if (loginDto.Password != "admin")
                 return null;
 
+            if (loginDto.Username == null || loginDto.Username.Length > 50)
+            {
+                _logger.LogWarning("Invalid input parameter");
+                return null;
+            }
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, loginDto.Username),

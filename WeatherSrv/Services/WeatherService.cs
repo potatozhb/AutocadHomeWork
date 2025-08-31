@@ -29,7 +29,7 @@ namespace WeatherSrv.Services
 
         public async Task<IEnumerable<WeatherReadDto>> GetWeathersAsync(string userId, int? start, int? end)
         {
-            if (string.IsNullOrWhiteSpace(userId))
+            if (string.IsNullOrWhiteSpace(userId) || userId.Length > 50)
             {
                 _logger.LogError("--> userId can't be empty");
                 throw new ArgumentException("Invalid userId");
@@ -65,7 +65,7 @@ namespace WeatherSrv.Services
 
         public async Task<WeatherReadDto> CreateWeatherForUserAsync(string userId, WeatherCreateDto weatherCreateDto)
         {
-            if (string.IsNullOrWhiteSpace(userId))
+            if (string.IsNullOrWhiteSpace(userId) || userId.Length > 50)
             {
                 _logger.LogError("--> userId can't be empty");
                 throw new ArgumentException("Invalid userId");

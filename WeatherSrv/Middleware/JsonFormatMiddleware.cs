@@ -1,10 +1,13 @@
 
 using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace WeatherSrv.Middleware
 {
     public class JsonFormatMiddleware
     {
+        private const int _limit = 10; // max requests per 10 seconds fixed window
+        private static readonly MemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
         private readonly RequestDelegate _next;
         private readonly ILogger<JsonFormatMiddleware> _logger;
         public JsonFormatMiddleware(RequestDelegate next, ILogger<JsonFormatMiddleware> logger)
@@ -15,6 +18,24 @@ namespace WeatherSrv.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
+            //Ratelimit here
+            var key = context.Connection.RemoteIpAddress?.ToString() ?? "anonymous";
+            if (!_cache.TryGetValue(key, out int count))
+            {
+                count = 0;
+            }
+
+            _logger.LogInformation($"--> Request count: {count}");
+            if (count >= _limit)
+            {
+                context.Response.StatusCode = 429; // Too Many Requests
+                await context.Response.WriteAsync("Rate limit exceeded.");
+                return;
+            }
+
+            _cache.Set(key, count + 1, TimeSpan.FromSeconds(10));
+
+
             //Authorization, can add more control based role and policy, 
             //currently just append the user name, just allowed retrieve logined user's data
             if (context.User.Identity?.IsAuthenticated == true)
