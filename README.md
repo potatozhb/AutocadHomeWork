@@ -7,18 +7,24 @@ Provide generated API documentation using an OpenAPI spec, or similar.
 Write Production ready code.
 
 Architecture:
-<img width="1554" height="811" alt="image" src="https://github.com/user-attachments/assets/d90702c6-6a76-4f34-bff7-6933b8bf5913" />
-
-
+<img width="1182" height="734" alt="image" src="https://github.com/user-attachments/assets/bbee6728-301f-4284-b07b-a6002a289905" />
 
 Endpoints:
-1. Get all datas in the table. use it for interview, it will show all informations include key.
+1. Login , after login success, use raw bear token for endpoints 3 and 4.
+
+POST /api/v1/auth/login
+{
+  "username":"string",
+  "password":"admin "  //hardcode inside, have to be "admin", because no enrollment endpoint
+}
+
+2. Get all datas in the table. use it for interview, it will show all informations include key.
 GET /api/v1/Weather
 
-2. Get all datas by user id.
+3.  Get all datas by user id.
 GET /api/v1/Weather/data?start={int?}&end={int?}
 
-3. Post a record by user
+4. Post a record by user
 POST /api/v1/Weather/data
 
 
