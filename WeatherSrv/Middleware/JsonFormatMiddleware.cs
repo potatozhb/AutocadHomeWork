@@ -59,7 +59,26 @@ namespace WeatherSrv.Middleware
                 }
             }
 
-            await _next(context);
+            try
+            {
+                await _next(context);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled exception occurred");
+
+                context.Response.StatusCode = 500;
+                context.Response.ContentType = "application/json";
+
+                var result = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    error = "An unexpected error occurred.",
+                    details = ex.Message // Optional
+                });
+
+                await context.Response.WriteAsync(result);
+            }
+
         }
     }
 }

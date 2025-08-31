@@ -7,6 +7,7 @@ using System.Text;
 using WeatherSrv.Data;
 using WeatherSrv.Middleware;
 using WeatherSrv.Repos;
+using WeatherSrv.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,8 @@ else
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection")));
 }
 
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IWeatherService, WeatherService>();
 builder.Services.AddScoped<IWeatherRepo, WeatherRepo>();
 
 builder.Services.AddAuthentication(options =>

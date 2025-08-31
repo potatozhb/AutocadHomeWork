@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using WeatherSrv.Dtos;
 using WeatherSrv.Models;
 using WeatherSrv.Repos;
+using WeatherSrv.Services;
 
 namespace WeatherSrv.Controllers
 {
@@ -13,14 +14,12 @@ namespace WeatherSrv.Controllers
     [ApiVersion("1.0")]
     public class WeatherController : ControllerBase
     {
-        private readonly IWeatherRepo _weatherRepo;
-        private readonly IMapper _mapper;
+        private readonly IWeatherService _weatherService;
         private readonly ILogger _logger;
 
-        public WeatherController(IWeatherRepo weatherRepo, IMapper mapper, ILogger<WeatherController> logger)
+        public WeatherController(IWeatherService weatherService, ILogger<WeatherController> logger)
         {
-            _weatherRepo = weatherRepo;
-            _mapper = mapper;
+            _weatherService = weatherService;
             _logger = logger;
         }
 
@@ -29,13 +28,9 @@ namespace WeatherSrv.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<WeatherReadDto>>> GetWeathers()
+        public async Task<ActionResult<IEnumerable<Weather>>> GetWeathers()
         {
-            _logger.LogInformation("--> Getting Weathers....");
-            Console.WriteLine("--> Getting Weathers....");
-
-            var weathers = await this._weatherRepo.GetAllWeathersAsync();
-
+            var weathers = await this._weatherService.GetWeathersAsync();
             return Ok(weathers);
         }
 
@@ -46,32 +41,24 @@ namespace WeatherSrv.Controllers
             [FromQuery] int? start = null,
             [FromQuery] int? end = null)
         {
-            if (userId.Length == 0)
+            try
             {
-                _logger.LogError($"--> userId can't be empty");
-                return BadRequest("Invalid parameters");
+                var weatherDtos = await _weatherService.GetWeathersAsync(userId, start, end);
+
+                if (!weatherDtos.Any())
+                    return NotFound($"User {userId} not found");
+
+                return Ok(new WeatherReadResponse { Data = weatherDtos });
             }
-
-            IEnumerable<Weather> weathers;
-
-            if (start.HasValue && end.HasValue)
+            catch (ArgumentException ex)
             {
-                _logger.LogInformation($"--> Getting Weathers for user {userId} from index {start.Value} to {end.Value}....");
-                if (start < 0 || end <= start)
-                    return BadRequest("Invalid paging parameters");
-
-                weathers = await this._weatherRepo.GetAllWeathersByUserAsync(userId, start.Value, end.Value);
+                return BadRequest(ex.Message);
             }
-            else
+            catch (Exception ex)
             {
-                _logger.LogInformation($"--> Getting Weathers for user {userId}....");
-                weathers = await this._weatherRepo.GetAllWeathersByUserAsync(userId);
+                _logger.LogError(ex, "Unexpected error fetching user weathers");
+                return StatusCode(500, "An unexpected error occurred.");
             }
-
-            if (weathers.Count() == 0) return NotFound($"User {userId} not found");
-            var weathersReadDto = _mapper.Map<IEnumerable<WeatherReadDto>>(weathers);
-
-            return Ok(new WeatherReadResponse() { Data = weathersReadDto });
         }
 
         [HttpPost("data")]
@@ -80,7 +67,6 @@ namespace WeatherSrv.Controllers
                                 [FromHeader(Name = "x-userId")] string userId,
                                 [FromBody] WeatherCreateDto weatherCreateDto)
         {
-            _logger.LogInformation($"--> Creating Weathers for user {userId}....");
             /*
              * Suppose we just record one place weather.
              1. if different users create opposite data, how to handle?
@@ -88,19 +74,20 @@ namespace WeatherSrv.Controllers
              2. can one day record multiple records?
                 [one day can record multiple records, timestamp is different]
              */
-            if (userId.Length == 0)
+            try
             {
-                _logger.LogError($"--> userId can't be empty");
-                return BadRequest("Invalid parameters");
+                var createdWeather = await _weatherService.CreateWeatherForUserAsync(userId, weatherCreateDto);
+                return Created("", createdWeather);
             }
-            var weather = this._mapper.Map<Weather>(weatherCreateDto);
-            weather.UserId = userId;
-            this._weatherRepo.CreateWeather(weather);
-            var weathersReadDto = _mapper.Map<WeatherReadDto>(weather);
-
-            await this._weatherRepo.SaveChangesAsync();
-
-            return Created("", weathersReadDto);
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error creating weather for user");
+                return StatusCode(500, "An unexpected error occurred.");
+            }
         }
     }
 

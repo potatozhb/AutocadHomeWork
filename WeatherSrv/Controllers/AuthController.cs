@@ -1,68 +1,34 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Asp.Versioning;
-using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using WeatherSrv.Dtos;
+using WeatherSrv.Services;
 
 namespace WeatherSrv.Controllers
 {
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     [ApiVersion("1.0")]
-    public class AuthController:ControllerBase
+    public class AuthController : ControllerBase
     {
-        private readonly IMapper _mapper;
-        private readonly ILogger _logger;
-        private readonly IConfiguration _config;
+        private readonly IAuthService _authService;
 
-        public AuthController(IConfiguration config, IMapper mapper, ILogger<WeatherController> logger)
+        public AuthController(IAuthService authService)
         {
-            _config = config;
-            _mapper = mapper;
-            _logger = logger;
+            _authService = authService;
         }
 
         [HttpPost("login")]
-        public ActionResult Login([FromBody] UserCreateDto loginDto)
+        public async Task<IActionResult> Login([FromBody] UserCreateDto loginDto)
         {
-            // use fixed password, not include enrollment
-            if (loginDto.Password == "admin")
-            {
-                var claims = new[]
-                {
-                    new Claim(ClaimTypes.Name, loginDto.Username),
-                    new Claim("role", "User")
-                };
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-                if(loginDto.Username == "admin")
-                {
-                    claims = new[]
-                    {
-                        new Claim(ClaimTypes.Name, loginDto.Username),
-                        new Claim("role", "Admin")
-                    };
-                }
+            var token = await _authService.AuthenticateAsync(loginDto);
 
-                var issuer = _config.GetValue<string>("Issuer");
-                var audience = _config.GetValue<string>("Audience");
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                    _config.GetValue<string>("SuperSecretKey")));
-                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            if (token == null)
+                return Unauthorized();
 
-                var token = new JwtSecurityToken(
-                    issuer: issuer,
-                    audience: audience,
-                    claims: claims,
-                    expires: DateTime.Now.AddHours(1),
-                    signingCredentials: creds);
-
-                return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
-            }
-            
-            return Unauthorized();
+            return Ok(new { token });
         }
     }
 }
