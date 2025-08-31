@@ -1,6 +1,9 @@
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using WeatherSrv.Data;
 using WeatherSrv.Middleware;
 using WeatherSrv.Repos;
@@ -23,6 +26,26 @@ else
 
 builder.Services.AddScoped<IWeatherRepo, WeatherRepo>();
 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration.GetValue<string>("Issuer"),
+        ValidAudience = builder.Configuration.GetValue<string>("Audience"),
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration.GetValue<string>("SuperSecretKey")))
+    };
+});
+builder.Services.AddAuthorization();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -80,6 +103,8 @@ if (app.Environment.IsDevelopment())
         });
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseMiddleware<JsonFormatMiddleware>();
 
 app.UseHttpsRedirection();

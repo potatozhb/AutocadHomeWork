@@ -1,6 +1,6 @@
-
 using Asp.Versioning;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WeatherSrv.Dtos;
 using WeatherSrv.Models;
@@ -40,17 +40,23 @@ namespace WeatherSrv.Controllers
         }
 
         [HttpGet("data")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<WeatherReadDto>>> GetUserWeathers(
             [FromHeader(Name = "x-userId")] string userId,
             [FromQuery] int? start = null,
             [FromQuery] int? end = null)
         {
+            if (userId.Length == 0)
+            {
+                _logger.LogError($"--> userId can't be empty");
+                return BadRequest("Invalid parameters");
+            }
+
             IEnumerable<Weather> weathers;
 
             if (start.HasValue && end.HasValue)
             {
                 _logger.LogInformation($"--> Getting Weathers for user {userId} from index {start.Value} to {end.Value}....");
-                Console.WriteLine($"--> Getting Weathers for user {userId} from index {start.Value} to {end.Value}....");
                 if (start < 0 || end <= start)
                     return BadRequest("Invalid paging parameters");
 
@@ -59,7 +65,6 @@ namespace WeatherSrv.Controllers
             else
             {
                 _logger.LogInformation($"--> Getting Weathers for user {userId}....");
-                Console.WriteLine($"--> Getting Weathers for user {userId}....");
                 weathers = await this._weatherRepo.GetAllWeathersByUserAsync(userId);
             }
 
@@ -70,12 +75,12 @@ namespace WeatherSrv.Controllers
         }
 
         [HttpPost("data")]
+        [Authorize]
         public async Task<ActionResult<WeatherReadDto>> CreateWeatherForUser(
                                 [FromHeader(Name = "x-userId")] string userId,
                                 [FromBody] WeatherCreateDto weatherCreateDto)
         {
             _logger.LogInformation($"--> Creating Weathers for user {userId}....");
-            Console.WriteLine($"--> Creating Weathers for user {userId}....");
             /*
              * Suppose we just record one place weather.
              1. if different users create opposite data, how to handle?
@@ -83,6 +88,11 @@ namespace WeatherSrv.Controllers
              2. can one day record multiple records?
                 [one day can record multiple records, timestamp is different]
              */
+            if (userId.Length == 0)
+            {
+                _logger.LogError($"--> userId can't be empty");
+                return BadRequest("Invalid parameters");
+            }
             var weather = this._mapper.Map<Weather>(weatherCreateDto);
             weather.UserId = userId;
             this._weatherRepo.CreateWeather(weather);

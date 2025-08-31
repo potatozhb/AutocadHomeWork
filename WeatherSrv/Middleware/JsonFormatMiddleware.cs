@@ -15,9 +15,15 @@ namespace WeatherSrv.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
-            //Authentication
+            //Authorization, can add more control based role and policy, 
+            //currently just append the user name, just allowed retrieve logined user's data
+            if (context.User.Identity?.IsAuthenticated == true)
+            {
+                var username = context.User.Identity.Name ?? "";
+                context.Request.Headers["x-userId"] = username;
+            }
 
-
+            //Json format
             if (context.Request.ContentType?.Contains("application/json", StringComparison.OrdinalIgnoreCase) == true &&
                 (HttpMethods.IsPost(context.Request.Method) ||
                  HttpMethods.IsPut(context.Request.Method) ||
@@ -32,7 +38,7 @@ namespace WeatherSrv.Middleware
                     //try parse
                     try
                     {
-                        var jsondoc =JsonDocument.Parse(body);
+                        var jsondoc = JsonDocument.Parse(body);
                         var root = jsondoc.RootElement;
 
                         //camelCase
@@ -43,7 +49,7 @@ namespace WeatherSrv.Middleware
                         var bytes = System.Text.Encoding.UTF8.GetBytes(normalizedJson);
                         context.Request.Body = new MemoryStream(bytes);
                     }
-                    catch(JsonException ex)
+                    catch (JsonException ex)
                     {
                         _logger.LogError($"Bad request: {ex.Message}");
                         context.Response.StatusCode = StatusCodes.Status400BadRequest;
