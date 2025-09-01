@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddMemoryCache();
-if (builder.Configuration.GetValue<bool>("UserInMemoryDB") && builder.Environment.IsDevelopment())
+if (builder.Configuration.GetValue<bool>("UseInMemoryDB") && builder.Environment.IsDevelopment())
 {
     Console.WriteLine("--> Using InMem Db");
     builder.Services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase("InMem"));
