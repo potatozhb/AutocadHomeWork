@@ -1,5 +1,6 @@
 
 using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace WeatherSrv.Middleware
@@ -10,6 +11,12 @@ namespace WeatherSrv.Middleware
         private static readonly MemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
         private readonly RequestDelegate _next;
         private readonly ILogger<JsonFormatMiddleware> _logger;
+
+        private static readonly HashSet<string> _publicPaths = new()
+            {
+                "/api/v1/auth/login"
+            };
+
         public JsonFormatMiddleware(RequestDelegate next, ILogger<JsonFormatMiddleware> logger)
         {
             this._next = next;
@@ -18,7 +25,47 @@ namespace WeatherSrv.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
-            //Ratelimit here
+            if (await HandleAuthorization(context) == false)
+                return;
+
+            if (await HandleRateLimiting(context) == false)
+                return;
+
+            HandleUserHeader(context);
+
+            if (!await HandleJsonNormalization(context))
+                return;
+
+            await HandleRequestWithException(context);
+        }
+        private async Task<bool> HandleAuthorization(HttpContext context)
+        {
+            var path = context.Request.Path.Value?.ToLower();
+
+            if (_publicPaths.Contains(path))
+                return true;
+
+            if (!(context.User.Identity?.IsAuthenticated ?? false))
+            
+            {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await context.Response.WriteAsync("User is not authenticated");
+                return false;
+            }
+
+            // role check, not add role claim currently
+            //if (!context.User.IsInRole("Admin"))
+            //{
+            //    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            //    await context.Response.WriteAsync("Access denied");
+            //    return false;
+            //}
+
+            return true;
+        }
+
+        private async Task<bool> HandleRateLimiting(HttpContext context)
+        {//Ratelimit here
             var key = context.Connection.RemoteIpAddress?.ToString() ?? "anonymous";
             if (!_cache.TryGetValue(key, out int count))
             {
@@ -30,12 +77,15 @@ namespace WeatherSrv.Middleware
             {
                 context.Response.StatusCode = 429; // Too Many Requests
                 await context.Response.WriteAsync("Rate limit exceeded.");
-                return;
+                return false;
             }
 
             _cache.Set(key, count + 1, TimeSpan.FromSeconds(10));
+            return true;
+        }
 
-
+        private void HandleUserHeader(HttpContext context)
+        {
             //Authorization, can add more control based role and policy, 
             //currently just append the user name, just allowed retrieve logined user's data
             if (context.User.Identity?.IsAuthenticated == true)
@@ -43,7 +93,10 @@ namespace WeatherSrv.Middleware
                 var username = context.User.Identity.Name ?? "";
                 context.Request.Headers["x-userId"] = username;
             }
+        }
 
+        private async Task<bool> HandleJsonNormalization(HttpContext context)
+        {
             //Json format
             if (context.Request.ContentType?.Contains("application/json", StringComparison.OrdinalIgnoreCase) == true &&
                 (HttpMethods.IsPost(context.Request.Method) ||
@@ -75,11 +128,15 @@ namespace WeatherSrv.Middleware
                         _logger.LogError($"Bad request: {ex.Message}");
                         context.Response.StatusCode = StatusCodes.Status400BadRequest;
                         await context.Response.WriteAsync($"Invalid Json format:{ex.Message}");
-                        return;
+                        return false;
                     }
                 }
             }
+            return true;
+        }
 
+        private async Task HandleRequestWithException(HttpContext context)
+        {
             try
             {
                 await _next(context);
@@ -99,7 +156,6 @@ namespace WeatherSrv.Middleware
 
                 await context.Response.WriteAsync(result);
             }
-
         }
     }
 }
