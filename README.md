@@ -221,30 +221,30 @@ Response (429)
 Go to K8S project. user terminal to follow next steps.
 
 a. Deploy weatherservice to K8S. 
-  1. build service image. docker build -t {user name}/weatherservice .
-  2. push image to docker hub. docker push {user name}/weatherservice
+  1. build service image. **docker build -t {user name}/weatherservice .**
+  2. push image to docker hub. **docker push {user name}/weatherservice**
   3. change K8S -> weather-depl.yaml -> spec -> template-> spec-> containers -> image value to {user name}/weatherservice:latest
-  4. run command: kubectl apply -f weather-depl.yaml
-  5. deploy port service: kubectl apply -f weather-np-srv.yaml
-  6. expose port number is 31333
-  7. use http://localhost:31333 to test the service
+  4. run command: **kubectl apply -f weather-depl.yaml**
+  5. deploy port service: **kubectl apply -f weather-np-srv.yaml**
+  6. expose port number is **31333**
+  7. use **http://localhost:31333** to test the service
 
 b. Deploy SQL Server to K8S. 
-  1. deploy local volume by command: kubectl apply - f local-pvc.yaml
+  1. deploy local volume by command: **kubectl apply - f local-pvc.yaml**
   2. you will see message "persistentvolumeclaim/mssql-weather created" for your first time deploy.
-  3. use command: "kubectl get pvc" to check the result.
+  3. use command: **kubectl get pvc** to check the result.
 
    ---Create SQL server strong password
-  1. use command to create a name: mssqlcad, key:SA_PASSWORD secret.  kubectl create secret generic mssqlcad --from-literal=SA_PASSWORD="Pa55w0rd!"
+  1. use command to create a name: mssqlcad, key:SA_PASSWORD secret.  **kubectl create secret generic mssqlcad --from-literal=SA_PASSWORD="Pa55w0rd!"**
   2. you will see message "secret/mssqlcad created"
 
   --Create loadbalancer to enable local SQL Management visit released sql in K8S
-  1. deploy three service to K8S.  kubectl apply -f mssql-depl.yaml
-  2. you will see three new service running by command: kubectl get svc
+  1. deploy three service to K8S.  **kubectl apply -f mssql-depl.yaml**
+  2. you will see three new service running by command: **kubectl get svc**
   3. mssql-cad-depl, mssql-cad-clusterip-srv, mssql-cad-loadbalancer
-  4. you can use local SQL Management to login the DB. username: localhost,14331 , password: Pa55w0rd!
-  5. local sql string: Server=localhost,14330;Initial Catalog=Weather;User ID=sa;Password=Pa55w0rd!;TrustServerCertificate=True;
-  6. production sql string: Server=mssql-cad-clusterip-srv,14331;Initial Catalog=Weather;User ID=sa;Password=Pa55w0rd!;TrustServerCertificate=True;
+  4. you can use local SQL Management to login the DB. **username: localhost,14331 , password: Pa55w0rd!**
+  5. local sql string: **Server=localhost,14330;Initial Catalog=Weather;User ID=sa;Password=Pa55w0rd!;TrustServerCertificate=True;**
+  6. production sql string: **Server=mssql-cad-clusterip-srv,14331;Initial Catalog=Weather;User ID=sa;Password=Pa55w0rd!;TrustServerCertificate=True;**
   
 c. Test the service in K8S.
 http://localhost:31333/api/v1/weather/data
