@@ -50,7 +50,7 @@ POST /api/v1/Weather/data
 
 <h3 style="font-size:24px">Test it with InMemory DB:</h3>
 
-1. set appsettings.Development.json->UserInMemoryDB to true.
+1. set appsettings.Development.json->UseInMemoryDB to true.
 
 2. run the service directly.
 
