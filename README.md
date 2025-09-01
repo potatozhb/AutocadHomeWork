@@ -1,4 +1,4 @@
-Requirements 
+<h3 style="font-size:24px">Requirements </h3>
 
 Use C# for the entire implementation. 
 
@@ -12,14 +12,14 @@ Write Production ready code.
 
 --------------------------------------------------------------------------------
 
-Architecture:
+<h3 style="font-size:24px">Architecture:</h3>
 <img width="1252" height="759" alt="image" src="https://github.com/user-attachments/assets/fd5ec626-5e47-4287-994d-661679d5bf06" />
 
 K8S:
 <img width="1230" height="718" alt="image" src="https://github.com/user-attachments/assets/f8f19bdc-dade-495d-81b8-ddd6aea192bd" />
 
 
-Endpoints:
+<h3 style="font-size:24px">Endpoints:</h3>
 1. Login , after login success, use raw bear token for endpoints 3 and 4.  
 
 POST /api/v1/auth/login 
@@ -47,7 +47,7 @@ POST /api/v1/Weather/data
 
 
 
-Test it with InMemory DB:
+<h3 style="font-size:24px">Test it with InMemory DB:</h3>
 1. set appsettings.Development.json->UserInMemoryDB to true.
 2. run the service directly.
 3. you will see the log "--> Using InMem Db", it means you are using InMemory DB.
@@ -55,7 +55,7 @@ Test it with InMemory DB:
 5. Default seed three records in it.
 
 
-Test it with local SQL Server:
+<h3 style="font-size:24px">Test it with local SQL Server:</h3>
 1. set appsettings.Development.json->UserInMemoryDB to false.
 2. set appsettings.Development.json->SqlServerConnection to your local SQL server connection string.
 3. run the service directly. with command: docker run -p 18080:8080 -d {user name}/weatherservice
@@ -67,7 +67,7 @@ Test it with local SQL Server:
 
 
 
-Release system by docker and K8S:
+<h3 style="font-size:24px">Release system by docker and K8S:</h3>
 
 Go to K8S project. user terminal to follow next steps.
 
