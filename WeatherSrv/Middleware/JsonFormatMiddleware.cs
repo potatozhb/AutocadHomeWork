@@ -1,7 +1,8 @@
 
+using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
+using WeatherSrv.Models;
 
 namespace WeatherSrv.Middleware
 {
@@ -14,7 +15,8 @@ namespace WeatherSrv.Middleware
 
         private static readonly HashSet<string> _publicPaths = new()
             {
-                "/api/v1/auth/login"
+                "/api/v1/auth/login",
+                "/api/v1/weather"
             };
 
         public JsonFormatMiddleware(RequestDelegate next, ILogger<JsonFormatMiddleware> logger)
