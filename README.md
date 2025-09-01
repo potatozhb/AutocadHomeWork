@@ -20,6 +20,7 @@ K8S:
 
 
 <h3 style="font-size:24px">Endpoints:</h3>
+
 1. Login , after login success, use raw bear token for endpoints 3 and 4.  
 
 POST /api/v1/auth/login 
@@ -48,22 +49,36 @@ POST /api/v1/Weather/data
 
 
 <h3 style="font-size:24px">Test it with InMemory DB:</h3>
-1. set appsettings.Development.json->UserInMemoryDB to true.
+
+1. set appsettings.Development.json->UseInMemoryDB to true.
+
 2. run the service directly.
+
 3. you will see the log "--> Using InMem Db", it means you are using InMemory DB.
+
 4. you can test all the endpoints without any DB.
+
 5. Default seed three records in it.
 
 
 <h3 style="font-size:24px">Test it with local SQL Server:</h3>
+
 1. set appsettings.Development.json->UserInMemoryDB to false.
+
 2. set appsettings.Development.json->SqlServerConnection to your local SQL server connection string.
+
 3. run the service directly. with command: docker run -p 18080:8080 -d {user name}/weatherservice
+
 4. you will see the log "--> Using SqlServer Db", it means you are using SQL server.
+
 5. the first time start the service, it will migrate db automatically.
+
 6. you can test all the endpoints with database.
+
 7. Default seed three records in it.
+
 8. If first time run the service, need apply the migration: dotnet ef database update
+
 
 
 
